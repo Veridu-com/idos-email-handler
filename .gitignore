@@ -11,7 +11,6 @@ environment.php
 phinx.yml
 phpdox.xml
 phpunit.xml
-server/docker/
 sftp-config.json
 vendor/
 resources/emails/cache/*.php
