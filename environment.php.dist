@@ -8,6 +8,7 @@ declare(strict_types = 1);
 
 if (! defined('__VERSION__')) {
     define('__VERSION__', '1.0');
+}
 
 if (! defined('__HNDKEY__')) {
     define('__HNDKEY__', '***REMOVED***');
