@@ -38,6 +38,12 @@ class Invitation extends AbstractCommand {
      * @var string
      */
     public $dashboardName;
+    /**
+     * Signup hash.
+     *
+     * @var string
+     */
+    public $signupHash;
 
     /**
      * {@inheritdoc}
