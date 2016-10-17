@@ -2,8 +2,8 @@
 $finder = Symfony\CS\Finder\DefaultFinder::create()
     ->files()
     ->in('app')
+    ->in('cli')
     ->in('config')
-    ->in('db')
     ->in('public')
     ->in('test')
     ->name('*.php');

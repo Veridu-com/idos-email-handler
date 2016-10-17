@@ -3,7 +3,7 @@
  * Copyright (c) 2012-2016 Veridu Ltd <https://veridu.com>
  * All rights reserved.
  */
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Worker;
 
@@ -54,44 +54,47 @@ class EmailDaemon extends Command {
         $worker = new GearmanWorker();
         $worker->addServer('localhost');
 
-        $worker->addFunction('send_email', function (GearmanJob $job) {
+        $worker->addFunction(
+            'send_email', function (GearmanJob $job) {
 
             // job data
-            $workload = $job->workload();
-            $data = json_decode($workload);
-            $serialized = json_encode([
-                'templatePath'  => $data->templatePath,
-                'to'            => $data->to,
-                'from'          => $data->from
-            ]);
-
-            // email template variables
-            $variables = (array) $data->variables;
-
-            var_dump($variables);
-
-            // sending e-mail 
-            $message = new Swift_Message();
-            $message
-                ->setSubject($data->subject)
-                ->setFrom($data->from)
-                ->setTo($data->to)
-                ->setBody(
-                    $this->blade->view()->make($data->templatePath, $variables)->render(),
-                    $data->bodyType
+                $workload = $job->workload();
+                $data = json_decode($workload);
+                $serialized = json_encode(
+                    [
+                    'templatePath'  => $data->templatePath,
+                    'to'            => $data->to,
+                    'from'          => $data->from
+                    ]
                 );
 
-            $this->logger->debug(sprintf('Trying to send e-mail. %s', $serialized));
-            $success = (bool) $this->mailer->send($message);
+            // email template variables
+                $variables = (array) $data->variables;
+
+                var_dump($variables);
+
+            // sending e-mail
+                $message = new Swift_Message();
+                $message
+                    ->setSubject($data->subject)
+                    ->setFrom($data->from)
+                    ->setTo($data->to)
+                    ->setBody(
+                        $this->blade->view()->make($data->templatePath, $variables)->render(),
+                        $data->bodyType
+                    );
+
+                $this->logger->debug(sprintf('Trying to send e-mail. %s', $serialized));
+                $success = (bool) $this->mailer->send($message);
 
             // if e-mail was sent
-            if ($success) {
-                $this->logger->debug(sprintf('Sent e-mail. %s', $serialized));
+                if ($success) {
+                    $this->logger->debug(sprintf('Sent e-mail. %s', $serialized));
 
-                // send idOS task completed status
-                // $url = sprintf('%s/tasks/%s', $this->settings['idos']['baseUrl'], $data->task_id);
-                // var_dump($url);
-                /*
+                    // send idOS task completed status
+                    // $url = sprintf('%s/tasks/%s', $this->settings['idos']['baseUrl'], $data->task_id);
+                    // var_dump($url);
+                    /*
                     $headers = [
                         'Content-Type' => 'application/json',
                         'Authorization' => sprintf('Bearer %s', $this->settings['idos']['jwt-token'])
@@ -102,13 +105,12 @@ class EmailDaemon extends Command {
                     ]);
                     $request = new Request('PUT', $url, $headers, $body);
                     $resp = $http->request($request);
-
-                 */
-
-            } else {
-                $this->logger->debug(sprintf('Failed to send e-mail. %s', $serialized));
+                             */
+                } else {
+                    $this->logger->debug(sprintf('Failed to send e-mail. %s', $serialized));
+                }
             }
-        });
+        );
 
         while ($worker->work());
     }

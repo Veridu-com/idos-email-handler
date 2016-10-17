@@ -6,12 +6,12 @@
 
 declare(strict_types = 1);
 
-namespace App\Command\User;
+namespace App\Command\Email;
 
 use App\Command\AbstractCommand;
 
 /**
- * User "Invitation" Command.
+ * Email "Invitation" Command.
  */
 class Invitation extends AbstractCommand {
     /**
@@ -25,7 +25,7 @@ class Invitation extends AbstractCommand {
      *
      * @var string
      */
-    public $hash;
+    public $signupHash;
     /**
      * Target company name.
      *

@@ -9,11 +9,8 @@ use App\Command;
 use App\Event\ListenerProvider;
 use App\Exception\AppException;
 use App\Factory;
-use App\Handler; // TODO: Why not use folder identifiers instead of using so many declarations?
-use App\Middleware as Middleware;
-use App\Middleware\Auth;
+use App\Handler;
 use Interop\Container\ContainerInterface;
-use Jenssegers\Optimus\Optimus;
 use League\Event\Emitter;
 use League\Tactician\CommandBus;
 use League\Tactician\Container\ContainerLocator;
@@ -244,30 +241,9 @@ $container['validatorFactory'] = function (ContainerInterface $container) {
     return new Factory\Validator();
 };
 
-// Auth Middleware
-$container['authMiddleware'] = function (ContainerInterface $container) {
-    return function ($authorizationRequirement) use ($container) {
-
-        return new Auth(
-            $authorizationRequirement
-        );
-    };
-};
-
 // Respect Validator
 $container['validator'] = function (ContainerInterface $container) {
     return Validator::create();
-};
-
-// Optimus
-$container['optimus'] = function (ContainerInterface $container) {
-    $settings = $container->get('settings');
-
-    return new Optimus(
-        $settings['optimus']['prime'],
-        $settings['optimus']['inverse'],
-        $settings['optimus']['random']
-    );
 };
 
 // App files
@@ -283,13 +259,34 @@ $container['globFiles'] = function () {
 $container['eventEmitter'] = function (ContainerInterface $container) {
     $emitter = new Emitter();
 
-    $providers = array_map(function ($providerFile) {
-        return preg_replace('/.*?Listener\/(.*)\/ListenerProvider.php/', 'App\\Listener\\\$1\\ListenerProvider', $providerFile);
-    }, $container->get('globFiles')['listenerProviders']);
+    $providers = array_map(
+        function ($providerFile) {
+            return preg_replace('/.*?Listener\/(.*)\/ListenerProvider.php/', 'App\\Listener\\\$1\\ListenerProvider', $providerFile);
+        }, $container->get('globFiles')['listenerProviders']
+    );
 
     foreach ($providers as $provider) {
         $emitter->useListenerProvider(new $provider($container));
     }
 
     return $emitter;
+};
+
+// Gearman Client
+$container['gearmanClient'] = function (ContainerInterface $container) : GearmanClient {
+    $settings = $container->get('settings');
+    $gearman  = new \GearmanClient();
+    if (isset($settings['gearman']['timeout'])) {
+        $gearman->setTimeout($settings['gearman']['timeout']);
+    }
+
+    foreach ($settings['gearman']['servers'] as $server) {
+        if (is_array($server)) {
+            $gearman->addServer($server[0], $server[1]);
+        } else {
+            $gearman->addServer($server);
+        }
+    }
+
+    return $gearman;
 };

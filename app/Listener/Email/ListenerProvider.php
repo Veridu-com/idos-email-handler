@@ -5,21 +5,20 @@
  * All rights reserved.
  */
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
-namespace App\Listener\Company;
+namespace App\Listener\Email;
 
-use App\Event\Company;
+use App\Event\Email;
 use App\Listener;
 use Interop\Container\ContainerInterface;
 
 class ListenerProvider extends Listener\AbstractListenerProvider {
     public function __construct(ContainerInterface $container) {
         $this->events = [
-            Company\Created::class => [
+            Email\Created::class => [
                 new Listener\LogFiredEventListener($container->get('log')('handler'))
             ]
         ];
     }
-
 }
