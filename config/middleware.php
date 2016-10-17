@@ -7,12 +7,20 @@
 use App\Middleware\Debugger;
 use App\Middleware\Watcher;
 use Slim\HttpCache\Cache;
+use Slim\Middleware\HttpBasicAuthentication;
 
 if (! isset($app)) {
     die('$app is not set!');
 }
 
 $app
-    ->add(new Watcher($app->getContainer()))
-    ->add(new Cache('private, no-cache, no-store', 0, true))
-    ->add(new Debugger());
+    ->add(
+        new HttpBasicAuthentication(
+            [
+                'users' => [
+                    __AUTHUSER__ => __AUTHPASS__
+                ],
+                'secure' => false
+            ]
+        )
+    );
