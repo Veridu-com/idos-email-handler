@@ -5,20 +5,19 @@
  * All rights reserved.
  */
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Controller;
 
 use App\Factory\Command;
-use Jenssegers\Optimus\Optimus;
 use League\Tactician\CommandBus;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 /**
- * Handles requests to /signup.
+ * Handles requests to /email.
  */
-class User implements ControllerInterface {
+class Email implements ControllerInterface {
     /**
      * Command Bus instance.
      *
@@ -42,52 +41,22 @@ class User implements ControllerInterface {
      */
     public function __construct(
         CommandBus $commandBus,
-        Command $commandFactory,
-        Optimus $optimus
+        Command $commandFactory
     ) {
         $this->commandBus     = $commandBus;
         $this->commandFactory = $commandFactory;
-        $this->optimus        = $optimus;
-    }
-
-    /**
-     * Sends user Signup e-mail.
-     * 
-     * @param \Psr\Http\Message\ServerRequestInterface $request
-     * @param \Psr\Http\Message\ResponseInterface      $response
-     *
-     * @return \Psr\Http\Message\ResponseInterface
-     */
-    public function signup(ServerRequestInterface $request, ResponseInterface $response) : ResponseInterface {
-        $command = $this->commandFactory->create('User\\Signup');
-        $command->setParameters($request->getParsedBody());
-        $success = $this->commandBus->handle($command);
-
-        $body = [
-            'status' => $success
-        ];
-        $statusCode = $success ? 200 : 500;
-
-        $command = $this->commandFactory->create('ResponseDispatch');
-        $command
-            ->setParameter('request', $request)
-            ->setParameter('response', $response)
-            ->setParameter('statusCode', $statusCode)
-            ->setParameter('body', $body);
-
-        return $this->commandBus->handle($command);
     }
 
     /**
      * Sends user Invitation e-mail.
-     * 
+     *
      * @param \Psr\Http\Message\ServerRequestInterface $request
      * @param \Psr\Http\Message\ResponseInterface      $response
      *
      * @return \Psr\Http\Message\ResponseInterface
      */
     public function invitation(ServerRequestInterface $request, ResponseInterface $response) : ResponseInterface {
-        $command = $this->commandFactory->create('User\\Invitation');
+        $command = $this->commandFactory->create('Email\\Invitation');
         $command->setParameters($request->getParsedBody());
         $success = $this->commandBus->handle($command);
 
@@ -105,5 +74,4 @@ class User implements ControllerInterface {
 
         return $this->commandBus->handle($command);
     }
-
 }
