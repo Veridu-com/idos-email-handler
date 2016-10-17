@@ -4,11 +4,23 @@
  * All rights reserved.
  */
 
-if (!defined('__VERSION__'))
+declare(strict_types = 1);
+
+if (! defined('__VERSION__')) {
     define('__VERSION__', '1.0');
 
-if (!defined('__AUTHUSER__'))
-    define('__AUTHUSER__', '***REMOVED***');
+if (! defined('__HNDKEY__')) {
+    define('__HNDKEY__', '***REMOVED***');
+}
 
-if (!defined('__AUTHPASS__'))
+if (! defined('__HNDSEC__')) {
+    define('__HNDSEC__', '***REMOVED***');
+}
+
+if (! defined('__AUTHUSER__')) {
+    define('__AUTHUSER__', '***REMOVED***');
+}
+
+if (! defined('__AUTHPASS__')) {
     define('__AUTHPASS__', '***REMOVED***');
+}
