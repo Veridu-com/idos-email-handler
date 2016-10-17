@@ -16,7 +16,7 @@ use Slim\App;
 /**
  * E-mail routing definitions.
  *
- * @link docs/signup/overview.md
+ * @link docs/email/overview.md
  * @see App\Controller\Email
  */
 class Email implements RouteInterface {
@@ -41,27 +41,23 @@ class Email implements RouteInterface {
         };
 
         $container      = $app->getContainer();
-        $authMiddleware = $container->get('authMiddleware');
 
-        self::signup($app, $authMiddleware);
-        self::invitation($app, $authMiddleware);
+        self::invitation($app);
     }
 
     /**
      * Sends user invitation e-mail.
      *
      * @param \Slim\App $app
-     * @param \callable $auth
      *
      * @return void
      */
-    private static function invitation(App $app, callable $auth) {
+    private static function invitation(App $app) {
         $app
             ->post(
                 '/email/invitation',
                 'App\Controller\Email:invitation'
             )
-            ->add($auth(Auth::BASIC))
             ->setName('email:invitation');
     }
 }

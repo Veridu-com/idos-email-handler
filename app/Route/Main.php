@@ -42,9 +42,8 @@ class Main implements RouteInterface {
         };
 
         $container      = $app->getContainer();
-        $authMiddleware = $container->get('authMiddleware');
 
-        self::listAll($app, $authMiddleware);
+        self::listAll($app);
     }
 
     /**
@@ -63,13 +62,12 @@ class Main implements RouteInterface {
      * @link docs/listAll.md
      * @see App\Controller\Main::listAll
      */
-    private static function listAll(App $app, callable $authMiddleware) {
+    private static function listAll(App $app) {
         $app
             ->get(
                 '/',
                 'App\Controller\Main:listAll'
             )
-            ->add($authMiddleware(Auth::BASIC))
             ->setName('main:listAll');
     }
 }

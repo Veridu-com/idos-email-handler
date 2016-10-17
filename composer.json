@@ -41,7 +41,8 @@
         "philo/laravel-blade": "^3.1",
         "swiftmailer/swiftmailer": "^5.4",
         "guzzlehttp/guzzle": "^6.2",
-        "symfony/console": "^3.1"
+        "symfony/console": "^3.1",
+        "tuupola/slim-basic-auth": "^2.1"
     },
     "require-dev": {
         "phpunit/phpunit": "@stable",
