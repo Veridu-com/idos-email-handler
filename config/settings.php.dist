@@ -4,33 +4,15 @@
  * All rights reserved.
  */
 
+declare(strict_types = 1);
+
 $appSettings = [
-    'debug' => true,
-    'displayErrorDetails' => true,
+    'debug'                             => true,
+    'displayErrorDetails'               => true,
     'determineRouteBeforeAppMiddleware' => true,
-    'db' => [
-        'driver'    => 'pgsql',
-        // 'read' => [
-        //     'host' => 'localhost'
-        // ],
-        // 'write' => [
-        //     'host' => 'localhost'
-        // ],
-        'host'      => 'localhost',
-        'port'      => 5432,
-        'database'  => 'apiFlavio',
-        'username'  => 'apiUser',
-        'password'  => 'apiPassword',
-        'charset'   => 'utf8',
-        'collation' => 'utf8_unicode_ci',
-        'prefix'    => '',
-        'options'   => [
-            \PDO::ATTR_PERSISTENT => true
-        ]
-    ],
-    'log' => [
+    'log'                               => [
         'path'  => sprintf(
-            '%s/../log/api-%04d%02d%02d.log',
+            '%s/../log/email-%04d%02d%02d.log',
             __DIR__,
             date('Y'),
             date('m'),
@@ -38,28 +20,10 @@ $appSettings = [
         ),
         'level' => Monolog\Logger::DEBUG
     ],
-    'cache' => [
-        'driver'  => 'redis',
-        'options' => [
-            'servers' => [
-                ['localhost', 6379]
-            ]
-        ]
-        // 'driver' => 'ephemeral'
-    ],
     'gearman' => [
         'timeout' => 1000,
         'servers' => [
             ['localhost', 4730]
         ]
-    ],
-    'optimus' => [
-        'prime'   => 807779603,
-        'inverse' => 1128502555,
-        'random'  => 2124053674
-    ],
-    'repository' => [
-        'strategy' => 'db',
-        'cached'   => false
     ]
 ];

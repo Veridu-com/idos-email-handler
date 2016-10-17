@@ -5,7 +5,7 @@
  * All rights reserved.
  */
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Controller;
 
@@ -69,7 +69,7 @@ class Main implements ControllerInterface {
      */
     public function listAll(ServerRequestInterface $request, ResponseInterface $response) : ResponseInterface {
         $classList = [
-            'User'
+            'Email'
         ];
         $routeList    = [];
         $publicRoutes = [];
