@@ -38,7 +38,12 @@ class EmailDaemon extends Command {
     protected function configure() {
         $this
             ->setName('email:daemon')
-            ->setDescription('idOS Email Service Daemon');
+            ->setDescription('idOS Email Service Daemon')
+            ->addArgument(
+                'serverList',
+                InputArgument::REQUIRED | InputArgument::IS_ARRAY,
+                'Gearman server host list (separate values by space)'
+            );
     }
 
     /**
