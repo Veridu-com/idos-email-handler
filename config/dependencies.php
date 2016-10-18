@@ -4,7 +4,6 @@
  * All rights reserved.
  */
 
-use Apix\Cache;
 use App\Command;
 use App\Event\ListenerProvider;
 use App\Exception\AppException;
@@ -37,17 +36,40 @@ if (! isset($app)) {
 $container = $app->getContainer();
 
 // Slim Error Handling
-$container['errorHandler'] = function (ContainerInterface $container) {
+$container['errorHandler'] = function (ContainerInterface $container) : callable {
     return function (
         ServerRequestInterface $request,
         ResponseInterface $response,
         \Exception $exception
     ) use ($container) {
+        $settings = $container->get('settings');
         $response = $container
             ->get('httpCache')
             ->denyCache($response);
 
         $log = $container->get('log');
+        $log('Foundation')->error(
+            sprintf(
+                '%s [%s:%d]',
+                $exception->getMessage(),
+                $exception->getFile(),
+                $exception->getLine()
+            )
+        );
+        $log('Foundation')->debug($exception->getTraceAsString());
+
+        $previousException = $exception->getPrevious();
+        if ($previousException) {
+            $log('Foundation')->error(
+                sprintf(
+                    '%s [%s:%d]',
+                    $previousException->getMessage(),
+                    $previousException->getFile(),
+                    $previousException->getLine()
+                )
+            );
+            $log('Foundation')->debug($previousException->getTraceAsString());
+        }
 
         if ($exception instanceof AppException) {
             $log('handler')->info(
@@ -58,17 +80,21 @@ $container['errorHandler'] = function (ContainerInterface $container) {
                     $exception->getLine()
                 )
             );
+            $log('handler')->debug($exception->getTraceAsString());
 
             $body = [
                 'status' => false,
                 'error'  => [
-                    'code' => $exception->getCode(),
-                    // 'type' => $exception->getType(),
-                    // 'link' => $exception->getLink(),
+                    'id'      => $container->get('logUidProcessor')->getUid(),
+                    'code'    => $exception->getCode(),
+                    // 'type'    => 'EXCEPTION_TYPE', // $exception->getType(),
+                    // 'link'    => 'https://docs.idos.io/errors/EXCEPTION_TYPE', // $exception->getLink(),
                     'message' => $exception->getMessage(),
-                    'trace'   => $exception->getTraceAsString()
                 ]
             ];
+            if ($settings['debug']) {
+                $body['error']['trace'] = $exception->getTrace();
+            }
 
             $command = $container
                 ->get('commandFactory')
@@ -82,17 +108,6 @@ $container['errorHandler'] = function (ContainerInterface $container) {
             return $container->get('commandBus')->handle($command);
         }
 
-        $log('Foundation')->error(
-            sprintf(
-                '%s [%s:%d]',
-                $exception->getMessage(),
-                $exception->getFile(),
-                $exception->getLine()
-            )
-        );
-        $log('Foundation')->error($exception->getTraceAsString());
-
-        $settings = $container->get('settings');
         if ($settings['debug']) {
             $prettyPageHandler = new PrettyPageHandler();
             // Add more information to the PrettyPageHandler
@@ -122,6 +137,7 @@ $container['errorHandler'] = function (ContainerInterface $container) {
         $body = [
             'status' => false,
             'error'  => [
+                'id'      => $container->get('logUidProcessor')->getUid(),
                 'code'    => 500,
                 'type'    => 'APPLICATION_ERROR',
                 'link'    => null,
@@ -141,17 +157,17 @@ $container['errorHandler'] = function (ContainerInterface $container) {
 };
 
 // Slim Not Found Handler
-$container['notFoundHandler'] = function (ContainerInterface $container) {
+$container['notFoundHandler'] = function (ContainerInterface $container) : callable {
     return function (
         ServerRequestInterface $request,
         ResponseInterface $response
     ) use ($container) {
-        throw new \Exception('not found');
+        throw new AppException('Whoopsies! Route not found!', 404);
     };
 };
 
 // Slim Not Allowed Handler
-$container['notAllowedHandler'] = function (ContainerInterface $container) {
+$container['notAllowedHandler'] = function (ContainerInterface $container) : callable {
     return function (
         ServerRequestInterface $request,
         ResponseInterface $response,
@@ -161,18 +177,28 @@ $container['notAllowedHandler'] = function (ContainerInterface $container) {
             return $response->withStatus(204);
         }
 
-        throw new \Exception('notAllowedHandler');
+        throw new AppException('Whoopsies! Method not allowed for this route!', 400);
     };
 };
 
+// Monolog Request UID Processor
+$container['logUidProcessor'] = function (ContainerInterface $container) : callable {
+    return new UidProcessor();
+};
+
+// Monolog Request Processor
+$container['logWebProcessor'] = function (ContainerInterface $container) : callable {
+    return new WebProcessor();
+};
+
 // Monolog Logger
-$container['log'] = function (ContainerInterface $container) {
+$container['log'] = function (ContainerInterface $container) : callable {
     return function ($channel = 'handler') use ($container) {
         $settings = $container->get('settings');
         $logger   = new Logger($channel);
         $logger
-            ->pushProcessor(new UidProcessor())
-            ->pushProcessor(new WebProcessor())
+            ->pushProcessor($container->get('logUidProcessor'))
+            ->pushProcessor($container->get('logWebProcessor'))
             ->pushHandler(new StreamHandler($settings['log']['path'], $settings['log']['level']));
 
         return $logger;
@@ -180,18 +206,14 @@ $container['log'] = function (ContainerInterface $container) {
 };
 
 // Slim HTTP Cache
-$container['httpCache'] = function (ContainerInterface $container) {
+$container['httpCache'] = function (ContainerInterface $container) : CacheProvider {
     return new CacheProvider();
 };
 
 // Tactician Command Bus
-$container['commandBus'] = function (ContainerInterface $container) {
+$container['commandBus'] = function (ContainerInterface $container) : CommandBus {
     $settings = $container->get('settings');
-    $logger   = new Logger('CommandBus');
-    $logger
-        ->pushProcessor(new UidProcessor())
-        ->pushProcessor(new WebProcessor())
-        ->pushHandler(new StreamHandler($settings['log']['path'], $settings['log']['level']));
+    $log      = $container->get('log');
 
     $commandPaths = glob(__DIR__ . '/../app/Command/*/*.php');
     $commands     = [];
@@ -224,7 +246,7 @@ $container['commandBus'] = function (ContainerInterface $container) {
         [
             new LoggerMiddleware(
                 $formatter,
-                $logger
+                $log('CommandBus')
             ),
             $handlerMiddleware
         ]
@@ -232,22 +254,22 @@ $container['commandBus'] = function (ContainerInterface $container) {
 };
 
 // App Command Factory
-$container['commandFactory'] = function (ContainerInterface $container) {
+$container['commandFactory'] = function (ContainerInterface $container) : Factory\Command {
     return new Factory\Command();
 };
 
 // Validator Factory
-$container['validatorFactory'] = function (ContainerInterface $container) {
+$container['validatorFactory'] = function (ContainerInterface $container) : Factory\Validator {
     return new Factory\Validator();
 };
 
 // Respect Validator
-$container['validator'] = function (ContainerInterface $container) {
+$container['validator'] = function (ContainerInterface $container) : Validator {
     return Validator::create();
 };
 
 // App files
-$container['globFiles'] = function () {
+$container['globFiles'] = function () : array {
     return [
         'routes'             => glob(__DIR__ . '/../app/Route/*.php'),
         'handlers'           => glob(__DIR__ . '/../app/Handler/*.php'),
@@ -256,7 +278,7 @@ $container['globFiles'] = function () {
 };
 
 // Register Event emitter & Event listeners
-$container['eventEmitter'] = function (ContainerInterface $container) {
+$container['eventEmitter'] = function (ContainerInterface $container) : Emitter {
     $emitter = new Emitter();
 
     $providers = array_map(
