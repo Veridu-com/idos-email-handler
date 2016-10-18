@@ -19,10 +19,9 @@ mb_internal_encoding('UTF-8');
 use Symfony\Component\Console\Application;
 
 require __DIR__ . '/config/settings.php';
-$settings = $appSettings['worker'];
 
-$logger = new App\Worker\Logger($settings['log']);
-$mailer = new App\Worker\Mailer($settings['mail']);
+$logger = new App\Worker\Logger($appSettings['log']);
+$mailer = new App\Worker\Mailer($appSettings['mail']);
 
 
 $application = new Application();
