@@ -56,14 +56,33 @@ class EmailDaemon extends Command {
      * @return void
      */
     protected function execute(InputInterface $input, OutputInterface $output) {
-        // actually instatiates worker
-        $worker = new GearmanWorker();
-        $worker->addServer('localhost');
+        // Server List setup
+        $servers = $input->getArgument('serverList');
 
-        $worker->addFunction(
-            'send_email', function (GearmanJob $job) {
+        $gearman = new \GearmanWorker();
+        foreach ($servers as $server) {
+            if (strpos($server, ':') === false) {
+                $this->logger->debug(sprintf('Adding Gearman Server: %s', $server));
+                $gearman->addServer($server);
+            } else {
+                $server    = explode(':', $server);
+                $server[1] = intval($server[1]);
+                $this->logger->debug(sprintf('Adding Gearman Server: %s:%d', $server[0], $server[1]));
+                $gearman->addServer($server[0], $server[1]);
+            }
+        }
 
-            // job data
+        // Run the worker in non-blocking mode
+        $gearman->addOptions(\GEARMAN_WORKER_NON_BLOCKING);
+
+        // 1 second I/O timeout
+        $gearman->setTimeout(1000);
+
+        $gearman->addFunction(
+            'send_email',
+            function (GearmanJob $job) {
+
+                // job data
                 $workload = $job->workload();
                 $data = json_decode($workload);
                 $serialized = json_encode(
@@ -74,12 +93,12 @@ class EmailDaemon extends Command {
                     ]
                 );
 
-            // email template variables
+                // email template variables
                 $variables = (array) $data->variables;
 
                 var_dump($variables);
 
-            // sending e-mail
+                // sending e-mail
                 $message = new Swift_Message();
                 $message
                     ->setSubject($data->subject)
@@ -93,7 +112,7 @@ class EmailDaemon extends Command {
                 $this->logger->debug(sprintf('Trying to send e-mail. %s', $serialized));
                 $success = (bool) $this->mailer->send($message);
 
-            // if e-mail was sent
+                // if e-mail was sent
                 if ($success) {
                     $this->logger->debug(sprintf('Sent e-mail. %s', $serialized));
 
@@ -118,6 +137,34 @@ class EmailDaemon extends Command {
             }
         );
 
-        while ($worker->work());
+        $this->logger->debug('Entering Gearman Worker Loop');
+
+        // Gearman's Loop
+        while ($gearman->work()
+                || ($gearman->returnCode() == \GEARMAN_IO_WAIT)
+                || ($gearman->returnCode() == \GEARMAN_NO_JOBS)
+                || ($gearman->returnCode() == \GEARMAN_TIMEOUT)
+        ) {
+            if ($gearman->returnCode() == \GEARMAN_SUCCESS) {
+                continue;
+            }
+
+            if (! @$gearman->wait()) {
+                if ($gearman->returnCode() == \GEARMAN_NO_ACTIVE_FDS) {
+                    // No server connection, sleep before reconnect
+                    $this->logger->debug('No active server, sleep before retry');
+                    sleep(5);
+                    continue;
+                }
+
+                if ($gearman->returnCode() == \GEARMAN_TIMEOUT) {
+                    // Job wait timeout, sleep before retry
+                    sleep(1);
+                    continue;
+                }
+            }
+        }
+
+        $this->logger->debug('Leaving Gearman Worker Loop');
     }
 }
