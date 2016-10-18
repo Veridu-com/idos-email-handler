@@ -20,6 +20,13 @@ $appSettings = [
         ),
         'level' => Monolog\Logger::DEBUG
     ],
+    'mail' => [
+       'host'       => '***REMOVED***',
+       'port'       => 587,
+       'username'   => '***REMOVED***',
+       'password'   => '',
+       'encryption' => 'tls'
+    ],
     'gearman' => [
         'timeout' => 1000,
         'servers' => [
