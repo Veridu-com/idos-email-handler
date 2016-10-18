@@ -37,7 +37,7 @@ class EmailDaemon extends Command {
 
     protected function configure() {
         $this
-            ->setName('daemon:email')
+            ->setName('email:daemon')
             ->setDescription('idOS Email Service Daemon');
     }
 

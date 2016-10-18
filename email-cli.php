@@ -25,5 +25,5 @@ $mailer = new App\Worker\Mailer($appSettings['mail']);
 
 
 $application = new Application();
-$application->add(new App\Worker\EmailDaemon($mailer, $logger, $settings));
+$application->add(new App\Worker\EmailDaemon($mailer, $logger, $appSettings));
 $application->run();
