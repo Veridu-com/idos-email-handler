@@ -25,7 +25,8 @@ class Email implements RouteInterface {
      */
     public static function getPublicNames() : array {
         return [
-            'email:invitation'
+            'email:invitation',
+            'email:otp',
         ];
     }
 
@@ -43,6 +44,7 @@ class Email implements RouteInterface {
         $container      = $app->getContainer();
 
         self::invitation($app);
+        self::otp($app);
     }
 
     /**
@@ -59,5 +61,21 @@ class Email implements RouteInterface {
                 'App\Controller\Email:invitation'
             )
             ->setName('email:invitation');
+    }
+
+    /**
+     * Sends user an OTP check Email.
+     *
+     * @param \Slim\App $app
+     *
+     * @return void
+     */
+    private static function otp(App $app) {
+        $app
+            ->post(
+                '/email/otp',
+                'App\Controller\Email:otp'
+            )
+            ->setName('email:otp');
     }
 }
