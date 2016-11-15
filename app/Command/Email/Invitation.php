@@ -40,6 +40,13 @@ class Invitation extends AbstractCommand {
     public $signupHash;
 
     /**
+     * The invitation object.
+     *
+     * @var object
+     */
+    public $invitation;
+
+    /**
      * {@inheritdoc}
      */
     public function setParameters(array $parameters) : self {
@@ -49,6 +56,10 @@ class Invitation extends AbstractCommand {
 
         if (isset($parameters['signupHash'])) {
             $this->signupHash = $parameters['signupHash'];
+        }
+
+        if (isset($parameters['invitation'])) {
+            $this->invitation = $parameters['invitation'];
         }
 
         if (isset($parameters['companyName'])) {

@@ -71,13 +71,15 @@ class EmailDaemon extends Command {
             // email template variables
                 $variables = (array) $data->variables;
 
+                $companyName = $variables['company']->name ?? $variables['companyName'] ?? 'Veridu';
+
                 var_dump($variables);
 
             // sending e-mail
                 $message = new Swift_Message();
                 $message
                     ->setSubject($data->subject)
-                    ->setFrom($data->from)
+                    ->setFrom([$data->from => $companyName])
                     ->setTo($data->to)
                     ->setBody(
                         $this->blade->view()->make($data->templatePath, $variables)->render(),

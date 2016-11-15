@@ -74,4 +74,32 @@ class Email implements ControllerInterface {
 
         return $this->commandBus->handle($command);
     }
+
+    /**
+     * Sends user an OTP Check e-mail.
+     *
+     * @param \Psr\Http\Message\ServerRequestInterface $request
+     * @param \Psr\Http\Message\ResponseInterface      $response
+     *
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    public function otp(ServerRequestInterface $request, ResponseInterface $response) : ResponseInterface {
+        $command = $this->commandFactory->create('Email\\OTP');
+        $command->setParameters($request->getParsedBody());
+        $success = $this->commandBus->handle($command);
+
+        $body = [
+            'status' => $success
+        ];
+        $statusCode = $success ? 200 : 500;
+
+        $command = $this->commandFactory->create('ResponseDispatch');
+        $command
+            ->setParameter('request', $request)
+            ->setParameter('response', $response)
+            ->setParameter('statusCode', $statusCode)
+            ->setParameter('body', $body);
+
+        return $this->commandBus->handle($command);
+    }
 }
