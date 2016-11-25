@@ -9,7 +9,6 @@ declare(strict_types = 1);
 
 namespace App\Route;
 
-use App\Middleware\Auth;
 use Interop\Container\ContainerInterface;
 use Slim\App;
 
@@ -41,7 +40,7 @@ class Main implements RouteInterface {
             );
         };
 
-        $container      = $app->getContainer();
+        $container = $app->getContainer();
 
         self::listAll($app);
     }

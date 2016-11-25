@@ -8,7 +8,6 @@ declare(strict_types = 1);
 namespace App\Worker;
 
 use GearmanJob;
-use GearmanWorker;
 use Philo\Blade\Blade;
 use Swift_Message;
 use Symfony\Component\Console\Command\Command;

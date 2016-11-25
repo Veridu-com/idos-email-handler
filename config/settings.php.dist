@@ -12,7 +12,7 @@ $appSettings = [
     'determineRouteBeforeAppMiddleware' => true,
     'log'                               => [
         'path'  => sprintf(
-            '%s/../log/email-%04d%02d%02d.log',
+            '%s/../log/web-%04d%02d%02d.log',
             __DIR__,
             date('Y'),
             date('m'),
@@ -32,5 +32,9 @@ $appSettings = [
         'servers' => [
             ['localhost', 4730]
         ]
+    ],
+    'path' => [
+        'views' => __DIR__ . '/../resources/emails',
+        'cache' => __DIR__ . '/../resources/emails/cache'
     ]
 ];
