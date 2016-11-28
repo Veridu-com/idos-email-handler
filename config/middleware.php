@@ -4,9 +4,6 @@
  * All rights reserved.
  */
 
-use App\Middleware\Debugger;
-use App\Middleware\Watcher;
-use Slim\HttpCache\Cache;
 use Slim\Middleware\HttpBasicAuthentication;
 
 if (! isset($app)) {

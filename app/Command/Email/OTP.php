@@ -84,7 +84,7 @@ class OTP extends AbstractCommand {
         if (isset($parameters['publicKey'])) {
             $this->credentialPubKey = $parameters['publicKey'];
         }
-        
+
         if (isset($parameters['password'])) {
             $this->password = $parameters['password'];
         }
