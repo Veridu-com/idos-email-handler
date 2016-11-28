@@ -6,7 +6,7 @@
 
 declare(strict_types = 1);
 
-use App\Helper\Env;
+use Cli\Utils\Env;
 
 if (! defined('__VERSION__')) {
     define('__VERSION__', Env::asString('IDOS_VERSION', '1.0'));
