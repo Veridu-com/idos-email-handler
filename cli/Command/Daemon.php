@@ -156,7 +156,7 @@ class Daemon extends Command {
 
                 // if e-mail was sent
                 if ($success) {
-                    $logger->debug(sprintf('Sent e-mail. %s', $serialized));
+                    $logger->debug(sprintf('Sent e-mail. %s', $body));
 
                     // send idOS task completed status
                     // $url = sprintf('%s/tasks/%s', $this->settings['idos']['baseUrl'], $jobData['task_id']);
@@ -174,7 +174,7 @@ class Daemon extends Command {
                     $resp = $http->request($request);
                              */
                 } else {
-                    $logger->debug(sprintf('Failed to send e-mail. %s', $serialized));
+                    $logger->debug(sprintf('Failed to send e-mail. %s', $body));
                 }
 
                 $logger->info('Job completed', ['time' => microtime(true) - $init]);
