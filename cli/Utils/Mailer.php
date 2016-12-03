@@ -15,27 +15,34 @@ use Swift_Message;
  * Command definition for Process-based Daemon.
  */
 class Mailer {
-    public $mailer;
+    private $host;
+    private $port;
+    private $username;
+    private $password;
+    private $encryption;
 
     public function __construct(array $settings) {
-        $transport = Swift_SmtpTransport::newInstance($settings['host'], $settings['port'])
-            ->setUsername($settings['username'])
-            ->setEncryption($settings['encryption'])
-            ->setPassword($settings['password']);
-
-        $this->mailer = Swift_Mailer::newInstance($transport);
+        $this->host       = $settings['host'];
+        $this->port       = $settings['port'];
+        $this->username   = $settings['username'];
+        $this->password   = $settings['password'];
+        $this->encryption = $settings['encryption'];
     }
 
-    public function send(string $subject, string $from, string $to, string $body, string $type) {
-        $message = Swift_Message::newInstance($subject, $body, $type)
+    public function send(string $subject, string $from, string $to, string $body, string $bodyType) : bool {
+        $transport = Swift_SmtpTransport::newInstance($this->host, $this->port)
+            ->setUsername($this->username)
+            ->setEncryption($this->encryption)
+            ->setPassword($this->password);
+
+        $mailer  = Swift_Mailer::newInstance($transport);
+        $message = new \Swift_Message();
+        $message
+            ->setSubject($subject)
             ->setFrom($from)
-            ->setTo($to);
+            ->setTo($to)
+            ->setBody($body, $bodyType);
 
-        return $this->mailer->send($message);
-
-    }
-
-    public function __call(string $name, array $arguments) {
-        return call_user_func_array([$this->mailer, $name], $arguments);
+        return (bool) $mailer->send($message);
     }
 }
