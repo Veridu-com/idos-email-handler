@@ -9,6 +9,7 @@ namespace Cli\Utils;
 
 use Swift_Mailer;
 use Swift_SmtpTransport;
+use Swift_Message;
 
 /**
  * Command definition for Process-based Daemon.
@@ -23,6 +24,15 @@ class Mailer {
             ->setPassword($settings['password']);
 
         $this->mailer = Swift_Mailer::newInstance($transport);
+    }
+
+    public function send(string $subject, string $from, string $to, string $body, string $type) {
+        $message = Swift_Message::newInstance($subject, $body, $type)
+            ->setFrom($from)
+            ->setTo($to);
+
+        return $this->mailer->send($message);
+
     }
 
     public function __call(string $name, array $arguments) {
