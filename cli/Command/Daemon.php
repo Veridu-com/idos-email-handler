@@ -75,9 +75,10 @@ class Daemon extends Command {
     protected function execute(InputInterface $input, OutputInterface $output) {
         $logFile = $input->getOption('logFile') ?? 'php://stdout';
         $logger = new Monolog('Email');
-        $logger->pushProcessor(new ProcessIdProcessor())
-        $logger->pushProcessor(new UidProcessor())
-        $logger->pushHandler(new StreamHandler($logFile, Monolog::DEBUG));
+        $logger
+            ->pushProcessor(new ProcessIdProcessor())
+            ->pushProcessor(new UidProcessor())
+            ->pushHandler(new StreamHandler($logFile, Monolog::DEBUG));
 
         $logger->debug('Initializing idOS E-mail Handler Daemon');
 
