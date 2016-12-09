@@ -10,6 +10,8 @@ namespace Cli\Command;
 use Cli\Utils\Mailer;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger as Monolog;
+use Monolog\Processor\ProcessIdProcessor;
+use Monolog\Processor\UidProcessor;
 use Philo\Blade\Blade;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -73,6 +75,8 @@ class Daemon extends Command {
     protected function execute(InputInterface $input, OutputInterface $output) {
         $logFile = $input->getOption('logFile') ?? 'php://stdout';
         $logger = new Monolog('Email');
+        $logger->pushProcessor(new ProcessIdProcessor())
+        $logger->pushProcessor(new UidProcessor())
         $logger->pushHandler(new StreamHandler($logFile, Monolog::DEBUG));
 
         $logger->debug('Initializing idOS E-mail Handler Daemon');
