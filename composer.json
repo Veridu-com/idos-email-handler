@@ -50,7 +50,7 @@
         "phploc/phploc": "@stable",
         "sebastian/phpcpd": "@stable",
         "squizlabs/php_codesniffer": "@stable",
-        "friendsofphp/php-cs-fixer": "@stable",
+        "friendsofphp/php-cs-fixer": "^1.13",
         "psy/psysh": "@stable",
         "theseer/phpdox": "@stable",
         "ext-xsl": "*"

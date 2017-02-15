@@ -29,6 +29,17 @@ class Mailer {
         $this->encryption = $settings['encryption'];
     }
 
+    /**
+     * Send the email message.
+     *
+     * @param string   $subject
+     * @param string   $from
+     * @param string   $to
+     * @param string   $body
+     * @param string   $bodyType
+     *
+     * @return bool
+     */
     public function send(string $subject, string $from, string $to, string $body, string $bodyType) : bool {
         $transport = Swift_SmtpTransport::newInstance($this->host, $this->port)
             ->setUsername($this->username)
