@@ -9,6 +9,7 @@ namespace Cli\Utils;
 
 use Swift_Mailer;
 use Swift_SmtpTransport;
+use Swift_Message;
 
 /**
  * Command definition for Process-based Daemon.
@@ -31,11 +32,11 @@ class Mailer {
     /**
      * Send the email message.
      *
-     * @param string $subject
-     * @param string $from
-     * @param string $to
-     * @param string $body
-     * @param string $bodyType
+     * @param string   $subject
+     * @param string   $from
+     * @param string   $to
+     * @param string   $body
+     * @param string   $bodyType
      *
      * @return bool
      */
