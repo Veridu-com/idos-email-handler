@@ -1,21 +1,22 @@
-# Idos E-mail Service Handler
-This service handler is responsible fo sending e-mails.
+# idOS Email Handler
 
-## API
-Set up a server:
+# Setup
 
-`php -S localhost:8000 -t public/`
+You can read how to setup the idOS CRA Handler in the [Setup Manual](Setup.md)
 
-Access `/` route to list all registered e-mail endpoints.
+# Operation
 
+You can read how to operate the idOS CRA Handler in the [Operation Manual](Operation.md)
 
-## Command Line Interface
+# Documentation
 
-List all commands:
+To generate the internal documentation, run:
 
-`php cli.php` 
+```bash
+./vendor/bin/phploc --log-xml=build/phploc.xml cli/
+./vendor/bin/phpmd cli/ xml cleancode,codesize,controversial,design,naming,unusedcode --reportfile build/pmd.xml
+./vendor/bin/phpcs --standard=VeriduRuleset.xml --report=xml --report-file=build/phpcs.xml cli/
+./vendor/bin/phpdox --file phpdox.xml.dist
+```
 
-
-Start worker daemon:
-
-`php cli.php daemon:email`
+The files will be stored at [docs/](docs/).

@@ -24,7 +24,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class Daemon extends Command {
     /**
-     * Application Settings
+     * Application Settings.
      *
      * @var array
      */
@@ -36,6 +36,11 @@ class Daemon extends Command {
         parent::__construct();
     }
 
+    /**
+     * Configure command.
+     *
+     * @return void
+     */
     protected function configure() {
         $this
             ->setName('email:daemon')
@@ -80,7 +85,7 @@ class Daemon extends Command {
      */
     protected function execute(InputInterface $input, OutputInterface $output) {
         $logFile = $input->getOption('logFile') ?? 'php://stdout';
-        $logger = new Monolog('Email');
+        $logger  = new Monolog('Email');
         $logger
             ->pushProcessor(new ProcessIdProcessor())
             ->pushProcessor(new UidProcessor())

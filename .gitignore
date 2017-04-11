@@ -4,6 +4,8 @@
 *.sublime-project
 *.sublime-workspace
 .php_cs
+build/
+docs/
 composer.lock
 phinx.yml
 phpdox.xml
