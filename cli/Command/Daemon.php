@@ -53,7 +53,7 @@ class Daemon extends Command {
             )
             ->addOption(
                 'healthCheck',
-                'h',
+                'c',
                 InputOption::VALUE_NONE,
                 'Enable queue health check'
             )
@@ -205,7 +205,7 @@ class Daemon extends Command {
                     $logger->info('Job completed', ['time' => microtime(true) - $init]);
                     $job->sendComplete('ok');
                 } else {
-                    $logger->error('Failed to send e-mail', ['time' => microtime(true) - $init], 'body' => $body]);
+                    $logger->error('Failed to send e-mail', ['time' => microtime(true) - $init, 'body' => $body]);
                 }
 
                 $lastJob = time();
