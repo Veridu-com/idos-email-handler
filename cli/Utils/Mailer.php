@@ -9,7 +9,6 @@ namespace Cli\Utils;
 
 use Swift_Mailer;
 use Swift_SmtpTransport;
-use Swift_Message;
 
 /**
  * Command definition for Process-based Daemon.

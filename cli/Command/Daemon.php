@@ -52,6 +52,12 @@ class Daemon extends Command {
                 'Development mode'
             )
             ->addOption(
+                'healthCheck',
+                'h',
+                InputOption::VALUE_NONE,
+                'Enable queue health check'
+            )
+            ->addOption(
                 'logFile',
                 'l',
                 InputOption::VALUE_REQUIRED,
@@ -70,7 +76,7 @@ class Daemon extends Command {
     }
 
     /**
-     * Command execution. This method will start the daemon.
+     * Command execution.
      *
      * @param \Symfony\Component\Console\Input\InputInterface   $input
      * @param \Symfony\Component\Console\Output\OutputInterface $outpput
@@ -97,6 +103,12 @@ class Daemon extends Command {
             error_reporting(-1);
         }
 
+        // Health check
+        $healthCheck = ! empty($input->getOption('healthCheck'));
+        if ($healthCheck) {
+            $logger->debug('Enabling health check');
+        }
+
         // Gearman Worker function name setup
         $functionName = $input->getArgument('functionName');
         if ((empty($functionName)) || (! preg_match('/^[a-zA-Z0-9\._-]+$/', $functionName))) {
@@ -110,13 +122,14 @@ class Daemon extends Command {
         foreach ($servers as $server) {
             if (strpos($server, ':') === false) {
                 $logger->debug(sprintf('Adding Gearman Server: %s', $server));
-                $gearman->addServer($server);
-            } else {
-                $server    = explode(':', $server);
-                $server[1] = intval($server[1]);
-                $logger->debug(sprintf('Adding Gearman Server: %s:%d', $server[0], $server[1]));
-                $gearman->addServer($server[0], $server[1]);
+                @$gearman->addServer($server);
+                continue;
             }
+
+            $server    = explode(':', $server);
+            $server[1] = intval($server[1]);
+            $logger->debug(sprintf('Adding Gearman Server: %s:%d', $server[0], $server[1]));
+            @$gearman->addServer($server[0], $server[1]);
         }
 
         // Run the worker in non-blocking mode
@@ -153,8 +166,7 @@ class Daemon extends Command {
                 }
 
                 $jobCount++;
-                $lastJob = time();
-                $init    = microtime(true);
+                $init = microtime(true);
 
                 $body = $blade
                     ->view()
@@ -189,20 +201,21 @@ class Daemon extends Command {
                     ]);
                     $request = new Request('PUT', $url, $headers, $body);
                     $resp = $http->request($request);
-                             */
+                    */
+                    $logger->info('Job completed', ['time' => microtime(true) - $init]);
+                    $job->sendComplete('ok');
                 } else {
-                    $logger->debug(sprintf('Failed to send e-mail. %s', $body));
+                    $logger->error('Failed to send e-mail', ['time' => microtime(true) - $init], 'body' => $body]);
                 }
 
-                $logger->info('Job completed', ['time' => microtime(true) - $init]);
-                $job->sendComplete('ok');
+                $lastJob = time();
             }
         );
 
         $logger->debug('Entering Gearman Worker Loop');
 
         // Gearman's Loop
-        while ($gearman->work()
+        while (@$gearman->work()
                 || ($gearman->returnCode() == \GEARMAN_IO_WAIT)
                 || ($gearman->returnCode() == \GEARMAN_NO_JOBS)
                 || ($gearman->returnCode() == \GEARMAN_TIMEOUT)
@@ -227,7 +240,7 @@ class Daemon extends Command {
                         exit;
                     }
 
-                    if (((time() - $bootTime) > 10) && ((time() - $lastJob) > 10)) {
+                    if (($healthCheck) && ((time() - $bootTime) > 10) && ((time() - $lastJob) > 10)) {
                         $logger->info(
                             'Inactivity detected, restarting',
                             [
@@ -241,6 +254,10 @@ class Daemon extends Command {
                     continue;
                 }
             }
+        }
+
+        if ($gearman->returnCode() != \GEARMAN_SUCCESS) {
+            $logger->error($gearman->error());
         }
 
         $logger->debug('Leaving Gearman Worker Loop', ['runtime' => time() - $bootTime, 'jobs' => $jobCount]);
