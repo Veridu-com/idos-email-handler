@@ -156,7 +156,7 @@ class Daemon extends Command {
         $gearman->addFunction(
             $functionName,
             function (\GearmanJob $job) use ($logger, $blade, $mailer, $devMode, &$jobCount, &$lastJob) {
-                $logger->info('E-mail job added');
+                $logger->info('E-mail job added', ['workload' => $job->workload()]);
                 $jobData = json_decode($job->workload(), true);
                 if ($jobData === null) {
                     $logger->warning('Invalid Job Workload!');
