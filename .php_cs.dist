@@ -1,7 +1,6 @@
 <?php
 $finder = Symfony\CS\Finder\DefaultFinder::create()
     ->files()
-    ->in('app')
     ->in('cli')
     ->in('config')
     ->in('public')
