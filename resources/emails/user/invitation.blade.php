@@ -19,7 +19,7 @@
 
         <p>
           <em>
-            This invitation expires in <strong>{{ date('d/m/Y', $invitation->expires) }}</strong>.
+            This invitation expires in <strong>{{ date('d/m/Y', $invitation['expires']) }}</strong>.
           </em>
         </p>
       </div>
