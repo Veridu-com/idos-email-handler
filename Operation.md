@@ -9,7 +9,7 @@ You need to set some environment variables in order to configure the Email daemo
 * `IDOS_DEBUG`: indicates whether to enable debugging (default: false);
 * `IDOS_LOG_FILE`: is the path for the generated log file (default: 'log/cra.log');
 * `IDOS_GEARMAN_SERVERS`: a list of gearman servers that the daemon will register on (default: 'localhost:4730');
-* `IDOS_EMAIL_HOST`: the host of the email SMTP server (default: '***REMOVED***');
+* `IDOS_EMAIL_HOST`: the host of the email SMTP server (default: 'smtp.gmail.com');
 * `IDOS_EMAIL_PORT`: the port of the email SMTP server (default: 587);
 * `IDOS_EMAIL_USER`: the username used to authenticate within the SMTP server;
 * `IDOS_EMAIL_PASS`: the password used to authenticate within the SMTP server;
